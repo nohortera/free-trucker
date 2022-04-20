@@ -54,10 +54,9 @@ class TruckController {
             const userId = req.user.id
             const truckId = req.params.id
             const truck = await Truck.findOne({_id: truckId, created_by: userId})
-            console.log(truck)
-            // if (!truck) {
-            //     return res.status(400).json({message: 'Truck was not found'})
-            // }
+            if (!truck) {
+                return res.status(400).json({message: 'Truck was not found'})
+            }
             res.json({truck})
         } catch (e) {
             console.log(e)
@@ -134,6 +133,9 @@ class TruckController {
             }
             const assignedTruck = await Truck.findOne({assigned_to: userId})
             if (assignedTruck) {
+                if (assignedTruck.status === 'OL') {
+                    return res.status(400).json({message: 'Can not change assigned truck en route'})
+                }
                 await Truck.updateOne({created_by: userId, assigned_to: userId}, {$set: {assigned_to: null, status: null}})
             }
             await Truck.updateOne({_id: truckId, created_by: userId}, {$set: {assigned_to: userId, status: 'IS'}})

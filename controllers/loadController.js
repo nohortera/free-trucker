@@ -198,7 +198,7 @@ class LoadController {
             }
             const truckType = assignTruck(load.dimensions, load.payload)
             if (!truckType) {
-                return res.status(400).json({message: 'Load dimensions or payload are to high'})
+                return res.status(400).json({message: 'Load dimensions or payload are too high'})
             }
             // await Load.updateOne({_id: loadId, created_by: userId}, {$set: {status: 'POSTED'}})
             const truck = await Truck.findOne({type: truckType, status: 'IS'})
@@ -206,7 +206,7 @@ class LoadController {
                 // await Load.updateOne({_id: loadId, created_by: userId}, {$set: {status: 'NEW'}})
                 return res.status(400).json({message: 'No trucks are available for your load now'})
             }
-            await Truck.updateOne({type: truckType, status: 'IS'}, {$set: {status: 'OL'}})
+            await Truck.updateOne({assigned_to: truck.assigned_to, type: truckType, status: 'IS'}, {$set: {status: 'OL'}})
             await Load.updateOne({_id: loadId, created_by: userId}, {$set: {status: 'ASSIGNED', assigned_to: truck.assigned_to, state: 'En route to Pick Up'}})
             res.json({message: 'Load posted successfully', driver_found: true})
         } catch (e) {

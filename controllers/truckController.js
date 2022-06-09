@@ -3,7 +3,6 @@ const Truck = require('../models/Truck')
 class TruckController {
     async getTrucks(req, res) {
         try {
-            console.log(req.user.role)
             if (req.user.role !== 'DRIVER') {
                 return res.status(400).json('You are not a driver')
             }
@@ -131,8 +130,11 @@ class TruckController {
             if (!truck) {
                 return res.status(400).json({message: 'Invalid truck id'})
             }
-            const assignedTruck = await Truck.findOne({assigned_to: userId})
+            const assignedTruck = await Truck.findOne({assigned_to: userId, created_by: userId})
             if (assignedTruck) {
+                if (JSON.stringify(assignedTruck) === JSON.stringify(truck)) {
+                    return res.status(400).json({message: 'This truck is already assigned to you'})
+                }
                 if (assignedTruck.status === 'OL') {
                     return res.status(400).json({message: 'Can not change assigned truck en route'})
                 }
